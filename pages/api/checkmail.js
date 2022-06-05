@@ -12,18 +12,28 @@ export default async function checkMail(req, res) {
       user: user + "@calypsocloud.one",
       pass: password,
     },
+    logger: false,
   });
 
   await imapFlow.connect();
   let lock = await imapFlow.getMailboxLock("INBOX");
   try {
-    for await (let message of imapFlow.fetch("1:*", { envelope: true })) {
+    for await (let message of imapFlow.fetch("1:*", {
+      envelope: true,
+      flags: true,
+    })) {
+      let text = "";
+      for (const x of message.flags.values()) {
+        text += x;
+      }
       messages.push({
         uid: message.uid,
         date: message.envelope.date.toString(),
         from: message.envelope.from[0].address,
         subject: message.envelope.subject,
+        flags: text,
       });
+      // console.log(message.flags.values());
     }
     lock.release();
   } catch (e) {
