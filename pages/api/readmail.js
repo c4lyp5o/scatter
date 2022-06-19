@@ -27,8 +27,6 @@ export default async function readMail(req, res) {
     );
     mail = {
       uid: data.uid,
-      labels: data.labels,
-      flags: data.flags,
       decoded: await simpleParser(data.source),
     };
     lock.release();
@@ -48,7 +46,5 @@ export default async function readMail(req, res) {
     status: "ok",
     message: "Mail checked",
     mail: mail.decoded.html,
-    labels: mail.labels,
-    flags: mail.flags,
   });
 }

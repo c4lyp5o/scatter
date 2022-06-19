@@ -10,12 +10,12 @@ export default function Login() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    // if (user === "") {
-    //   setError("Please enter a username");
-    // }
-    // if (password === "") {
-    //   setError("Please enter a password");
-    // }
+    if (user === "") {
+      setError("Please enter a username");
+    }
+    if (password === "") {
+      setError("Please enter a password");
+    }
     // if (user !== "" && password !== "") {
     //   router.push("/inbox", {
     //     user: user,
