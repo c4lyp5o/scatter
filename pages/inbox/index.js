@@ -1,42 +1,49 @@
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import { withRouter } from "next/router";
-import axios from "axios";
+import { useEffect, useState, Suspense } from 'react';
+import { createPortal } from 'react-dom';
+import { withRouter } from 'next/router';
+import { Spinner } from 'react-awesome-spinners';
+import EmailBar from '../../components/EmailBar';
+import axios from 'axios';
 
 const Inbox = (props) => {
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
+  const [user, setUser] = useState('');
+  const [password, setPassword] = useState('');
   const [mail, setMail] = useState([]);
-  const [oneMail, setOneMail] = useState("");
-  const [error, setError] = useState("");
+  const [oneMail, setOneMail] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const [openReply, setOpenReply] = useState(false);
+  const [openForward, setOpenForward] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     axios
-      .post("/api/checkmail", {
+      .post('/api/checkmail', {
         user: props.router.query.user,
         password: props.router.query.password,
       })
       .then((response) => {
         let rvs = response.data.envelope;
         setMail(rvs.reverse());
-        console.log(rvs);
+        // console.log(rvs);
         setUser(response.data.user);
         setPassword(response.data.password);
         setLoading(false);
       })
       .catch((error) => {
+        console.log(error);
         setError(error.message);
         setLoading(false);
       });
   }, []);
 
   async function handleClick(event) {
-    setOneMail("");
+    setOneMail('');
     event.preventDefault();
     axios
-      .post("/api/readmail", {
+      .post('/api/readmail', {
         user: user,
         password: password,
         id: event.target.id,
@@ -52,11 +59,13 @@ const Inbox = (props) => {
 
   function theMail() {
     return (
-      <div
-        className="container"
-        dangerouslySetInnerHTML={{ __html: oneMail }}
-        sandbox=""
-      />
+      <div>
+        <div
+          className='container'
+          dangerouslySetInnerHTML={{ __html: oneMail }}
+          sandbox=''
+        />
+      </div>
     );
   }
 
@@ -67,10 +76,10 @@ const Inbox = (props) => {
     return (
       <iframe
         ref={setRef}
-        className="border-b-2 border-l-2 border-r-2 border-t-2 border-gray-600 overflow-y-auto"
-        width="100%"
-        height="100%"
-        sandbox="allow-scripts allow-same-origin"
+        className='border-b-2 border-l-2 border-r-2 border-t-2 border-gray-600 overflow-y-auto'
+        width='100%'
+        height='100%'
+        sandbox='allow-scripts allow-same-origin'
       >
         {container && createPortal(children, container)}
       </iframe>
@@ -82,35 +91,32 @@ const Inbox = (props) => {
   }
 
   function logOut() {
-    props.router.push("/");
+    props.router.push('/');
   }
 
   function seenMarker(flags) {
-    if (flags === "\\Seen") {
-      return "hover:bg-sky-700 font-weight-bold font-mono";
+    if (flags === '\\Seen') {
+      return 'hover:bg-sky-700 font-weight-bold font-mono';
     } else {
-      return "hover:bg-sky-700 font-mono bg-gray-200 font-2xl";
+      return 'hover:bg-sky-700 font-mono bg-gray-200 font-2xl';
     }
   }
 
   function EmailData(props) {
     const { uid, date, from, subject, flags } = props.data;
     return (
-      <div>
-        <ul className="p-2">
-          <li
-            key={uid}
-            id={uid}
-            className={seenMarker(flags)}
-            onClick={handleClick}
-          >
-            <h3 id={uid}>{subject}</h3>
-            <p id={uid}>{from}</p>
-            <p id={uid}>{date}</p>
-            <br />
-          </li>
-        </ul>
-      </div>
+      <ul className='p-2'>
+        <li
+          key={uid}
+          id={uid}
+          className={seenMarker(flags)}
+          onClick={handleClick}
+        >
+          <h3 id={uid}>{subject}</h3>
+          <p id={uid}>{from}</p>
+          <p id={uid}>{date}</p>
+        </li>
+      </ul>
     );
   }
 
@@ -120,7 +126,7 @@ const Inbox = (props) => {
         data={mail}
         RenderComponent={EmailData}
         pageLimit={5}
-        dataLimit={5}
+        dataLimit={7}
       />
     );
   }
@@ -130,7 +136,7 @@ const Inbox = (props) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-      window.scrollTo({ behavior: "smooth", top: "0px" });
+      window.scrollTo({ behavior: 'smooth', top: '0px' });
     }, [currentPage]);
 
     function goToNextPage() {
@@ -161,13 +167,13 @@ const Inbox = (props) => {
       if (pages <= 1) return null;
       else if (pages > 1)
         return (
-          <div className="grid">
+          <div className='grid grid-flow-col'>
             <div />
-            <div className="pagination">
+            <div className='pagination'>
               {/* previous button */}
               <button
                 onClick={goToPreviousPage}
-                className={`prev ${currentPage === 1 ? "disabled" : ""}`}
+                className={`prev ${currentPage === 1 ? 'disabled' : ''}`}
               >
                 Sebelumnya
               </button>
@@ -178,7 +184,7 @@ const Inbox = (props) => {
                   key={index}
                   onClick={changePage}
                   className={`paginationItem ${
-                    currentPage === item ? "active" : null
+                    currentPage === item ? 'active' : null
                   }`}
                 >
                   <span>{item}</span>
@@ -188,7 +194,7 @@ const Inbox = (props) => {
               {/* next button */}
               <button
                 onClick={goToNextPage}
-                className={`next ${currentPage === pages ? "disabled" : ""}`}
+                className={`next ${currentPage === pages ? 'disabled' : ''}`}
               >
                 Seterusnya
               </button>
@@ -200,13 +206,11 @@ const Inbox = (props) => {
 
     return (
       <div>
-        <div className="dataContainer">
+        <div className='dataContainer'>
           {getPaginatedData().map((d, idx) => (
             <RenderComponent key={idx} data={d} />
           ))}
         </div>
-        <br />
-        <br />
         {showPaginateNav()}
       </div>
     );
@@ -214,34 +218,37 @@ const Inbox = (props) => {
 
   if (loading)
     return (
-      <div className="container text-center h-auto border-l-blue-400">
-        <p className="text-center font-mono text-2xl">
+      <div className='container text-center h-auto border-l-blue-400'>
+        <br />
+        <br />
+        <p className='text-center font-mono text-2xl'>
           {props.router.query.user}@calypsocloud.one
         </p>
-        <p className="text-center font-mono text-2xl">Loading...</p>
+        <br />
+        <p className='text-center font-mono text-2xl'>Loading...</p>
+        <br />
+        <Spinner />
       </div>
     );
-  if (error) return <p className="text-center font-mono text-2xl">{error}</p>;
+  if (error) return <p className='text-center font-mono text-2xl'>{error}</p>;
   if (!mail) return <p>No mail here boi</p>;
 
   return (
-    <div className="grid grid-cols-2">
+    <div className='grid grid-cols-2'>
       <div>
-        <div className="p-2">
-          <h1>Your mails</h1>
+        <div className='p-2'>
           <button
-            className="bg-purple-400 border-slate-700 relative"
+            className='left-1/3 top-0 mt-1 absolute px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out'
             onClick={logOut}
           >
             Log Out
           </button>
-          <br />
           <h1>{user}</h1>
-          <br />
         </div>
         <PaginateEmails />
       </div>
       <div>
+        <EmailBar openReply={openReply} setOpenReply={setOpenReply} />
         <RenderingInFrames />
       </div>
     </div>
